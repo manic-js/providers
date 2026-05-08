@@ -33,10 +33,7 @@ export function netlify(options: NetlifyOptions = {}): ManicProvider {
         }
       }
 
-      const docsPath =
-        ctx.config.swagger !== false
-          ? ctx.config.swagger?.path ?? "/docs"
-          : null;
+      const docsPath = ctx.config.swagger !== false ? (ctx.config.swagger?.path ?? "/docs") : null;
 
       const apiImports: string[] = [];
       const apiRoutes: string[] = [];
@@ -49,15 +46,10 @@ export function netlify(options: NetlifyOptions = {}): ManicProvider {
             .replace("/index.ts", "")
             .replace("index.ts", "root");
 
-          apiImports.push(
-            `import api_${name.replace(/-/g, "_")} from "${cwd}/${entry}";`
-          );
+          apiImports.push(`import api_${name.replace(/-/g, "_")} from "${cwd}/${entry}";`);
           const routePath = name === "root" ? "" : `/${name}`;
           apiRoutes.push(
-            `app.group("/api${routePath}", (g) => g.use(api_${name.replace(
-              /-/g,
-              "_"
-            )}));`
+            `app.group("/api${routePath}", (g) => g.use(api_${name.replace(/-/g, "_")}));`,
           );
         }
       }
@@ -156,12 +148,10 @@ export const handler = async (event, context) => {
       // Create package.json for ESM support
       await Bun.write(
         "netlify/functions/package.json",
-        JSON.stringify({ type: "module" }, null, 2)
+        JSON.stringify({ type: "module" }, null, 2),
       );
 
-      process.stdout.write(
-        `\r${dim(green("● Exporting to Netlify... done"))}\n`
-      );
+      process.stdout.write(`\r${dim(green("● Exporting to Netlify... done"))}\n`);
       console.log(yellow(bold("ℹ Deploy with: manic deploy")));
     },
   };

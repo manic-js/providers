@@ -18,8 +18,8 @@ bun add @manicjs/providers
 ## Usage
 
 ```ts
-import { defineConfig } from 'manicjs/config';
-import { vercel } from '@manicjs/providers';
+import { defineConfig } from "manicjs/config";
+import { vercel } from "@manicjs/providers";
 
 export default defineConfig({
   providers: [vercel()],

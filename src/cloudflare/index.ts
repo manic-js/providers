@@ -40,9 +40,7 @@ export function cloudflare(options: CloudflareOptions = {}): ManicProvider {
       }
 
       // Detect if apiDocs plugin is configured
-      const hasApiDocs = ctx.config.plugins?.some(
-        (p) => p.name === "@manicjs/api-docs"
-      );
+      const hasApiDocs = ctx.config.plugins?.some((p) => p.name === "@manicjs/api-docs");
       const docsPath = "/docs";
       const hasApi = ctx.apiEntries.length > 0;
 
@@ -83,7 +81,7 @@ app.route("/api", apiApp);
 
 // OpenAPI spec
 const paths = {};
-${apiRoutes.map(route => `paths["/api${route === "/" ? "" : route}"] = { get: { responses: { 200: { description: "OK" } } } };`).join("\n")}
+${apiRoutes.map((route) => `paths["/api${route === "/" ? "" : route}"] = { get: { responses: { 200: { description: "OK" } } } };`).join("\n")}
 const spec = { openapi: "3.0.0", info: { title: "${ctx.config.app?.name ?? "Manic"} API", version: "1.0.0" }, paths };
 app.get("/openapi.json", (c) => c.json(spec));
 
@@ -96,9 +94,13 @@ app.get("${docsPath}/*", (c) => c.html(\`<html><head><meta charset="utf-8" /><me
 
 ${agentMiddleware(ctx)}
 
-${ctx.config.plugins?.some(p => p.name === '@manicjs/mcp') ? `// MCP endpoint — all methods
-app.all("${(ctx.config.plugins?.find((p: any) => p.name === '@manicjs/mcp') as any)?.mcpPath ?? '/mcp'}", (c) => _handleMcp(c.req.raw));
-app.all("${(ctx.config.plugins?.find((p: any) => p.name === '@manicjs/mcp') as any)?.mcpPath ?? '/mcp'}/*", (c) => _handleMcp(c.req.raw));` : ''}
+${
+  ctx.config.plugins?.some((p) => p.name === "@manicjs/mcp")
+    ? `// MCP endpoint — all methods
+app.all("${(ctx.config.plugins?.find((p: any) => p.name === "@manicjs/mcp") as any)?.mcpPath ?? "/mcp"}", (c) => _handleMcp(c.req.raw));
+app.all("${(ctx.config.plugins?.find((p: any) => p.name === "@manicjs/mcp") as any)?.mcpPath ?? "/mcp"}/*", (c) => _handleMcp(c.req.raw));`
+    : ""
+}
 
 // Serve static assets from Cloudflare Pages
 app.all("/*", async (c) => {
@@ -131,9 +133,7 @@ pages_build_output_dir = "./dist"
 `;
       await Bun.write("wrangler.toml", wranglerToml);
 
-      process.stdout.write(
-        `\r${dim(green("● Exporting to Cloudflare Pages... done"))}\n`
-      );
+      process.stdout.write(`\r${dim(green("● Exporting to Cloudflare Pages... done"))}\n`);
 
       console.log(yellow(bold("ℹ Deploy with: manic deploy")));
     },
