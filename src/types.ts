@@ -1,4 +1,4 @@
-import type { ManicConfig } from "manicjs/config";
+import type { ManicConfig } from 'manicjs/config';
 
 /**
  * Context passed to provider build functions

@@ -1,4 +1,4 @@
-import type { BuildContext } from "./types";
+import type { BuildContext } from './types';
 
 /**
  * Generates the agent middleware code to inject into provider workers.
@@ -6,31 +6,33 @@ import type { BuildContext } from "./types";
  */
 export function agentMiddleware(ctx: BuildContext): string {
   const plugins = ctx.config.plugins ?? [];
-  const hasMcp = plugins.some((p) => p.name === "@manicjs/mcp");
-  const hasApiDocs = plugins.some((p) => p.name === "@manicjs/api-docs");
-  const mcpPlugin = plugins.find((p: any) => p.name === "@manicjs/mcp") as any;
-  const mcpPath = mcpPlugin?.mcpPath ?? "/mcp";
-  const mcpName = JSON.stringify(ctx.config.app?.name ?? "manic-mcp");
-  const appName = JSON.stringify(ctx.config.app?.name ?? "Manic App");
+  const hasMcp = plugins.some(p => p.name === '@manicjs/mcp');
+  const hasApiDocs = plugins.some(p => p.name === '@manicjs/api-docs');
+  const mcpPlugin = plugins.find((p: any) => p.name === '@manicjs/mcp') as any;
+  const mcpPath = mcpPlugin?.mcpPath ?? '/mcp';
+  const mcpName = JSON.stringify(ctx.config.app?.name ?? 'manic-mcp');
+  const appName = JSON.stringify(ctx.config.app?.name ?? 'Manic App');
 
   const linkHeaders: string[] = [
     '</openapi.json>; rel="service-desc"; type="application/json"',
     '</.well-known/api-catalog>; rel="api-catalog"; type="application/linkset+json"',
   ];
   if (hasMcp) {
-    linkHeaders.push('</.well-known/mcp/server-card.json>; rel="mcp"; type="application/json"');
     linkHeaders.push(
-      '</.well-known/agent-skills/index.json>; rel="agent-skills"; type="application/json"',
+      '</.well-known/mcp/server-card.json>; rel="mcp"; type="application/json"'
+    );
+    linkHeaders.push(
+      '</.well-known/agent-skills/index.json>; rel="agent-skills"; type="application/json"'
     );
   }
   if (hasApiDocs) {
     linkHeaders.push('</docs>; rel="service-doc"; type="text/html"');
   }
 
-  const linkHeaderValue = linkHeaders.join(", ");
+  const linkHeaderValue = linkHeaders.join(', ');
 
   const mcpBlock = !hasMcp
-    ? ""
+    ? ''
     : `
 // ── MCP Streamable HTTP server ────────────────────────────────────────────────
 const _mcpSessions = new Map();
@@ -139,15 +141,15 @@ async function withAgentSupport(req, fetchAsset) {
   const wantsMarkdown = accept.includes('text/markdown');
   const agentMode = url.searchParams.get('mode') === 'agent';
 
-  ${hasMcp ? `if (url.pathname === ${JSON.stringify(mcpPath)} || url.pathname.startsWith(${JSON.stringify(mcpPath + "/")})) return _handleMcp(req);` : ""}
+  ${hasMcp ? `if (url.pathname === ${JSON.stringify(mcpPath)} || url.pathname.startsWith(${JSON.stringify(mcpPath + '/')})) return _handleMcp(req);` : ''}
 
   if (agentMode) {
     const info = {
       name: ${appName},
-      mcp: ${hasMcp ? `"/.well-known/mcp/server-card.json"` : "null"},
+      mcp: ${hasMcp ? `"/.well-known/mcp/server-card.json"` : 'null'},
       openapi: '/openapi.json',
-      docs: ${hasApiDocs ? '"/docs"' : "null"},
-      agentSkills: ${hasMcp ? '"/.well-known/agent-skills/index.json"' : "null"},
+      docs: ${hasApiDocs ? '"/docs"' : 'null'},
+      agentSkills: ${hasMcp ? '"/.well-known/agent-skills/index.json"' : 'null'},
       discovery: '/.well-known/api-catalog',
     };
     return new Response(JSON.stringify(info, null, 2), {
