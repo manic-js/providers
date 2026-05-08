@@ -50,7 +50,7 @@
   },
   "scripts": {},
   "dependencies": {
-    "@manicjs/tui": "1.0.1"
+    "@manicjs/tui": "1.0.2"
   },
   "devDependencies": {
     "@shikijs/transformers": "^4.0.2",
