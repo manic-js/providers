@@ -21,8 +21,9 @@
     "url": "https://github.com/manic-js/providers"
   },
   "files": [
-    "src/**/*",
-    "README.md"
+    "src",
+    "README.md",
+    "LICENSE"
   ],
   "type": "module",
   "main": "./src/index.ts",
