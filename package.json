@@ -1,6 +1,6 @@
 {
   "name": "@manicjs/providers",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Deployment providers for Manic framework - Vercel, Cloudflare, Netlify",
   "keywords": [
     "adapter",
@@ -59,7 +59,7 @@
     "test": "bun test --timeout 30000"
   },
   "dependencies": {
-    "@manicjs/tui": "1.0.2"
+    "@manicjs/tui": "^1.0.2"
   },
   "devDependencies": {
     "@shikijs/transformers": "^4.0.2",
