@@ -50,14 +50,14 @@
   },
   "scripts": {},
   "dependencies": {
-    "@manicjs/tui": "1.0.1"
+    "@manicjs/tui": "^1.0.3"
   },
   "devDependencies": {
     "@shikijs/transformers": "^4.0.2",
-    "@types/bun": "1.3.13",
+    "@types/bun": "^1.3.13",
     "@types/mdx": "^2.0.13",
     "fumadocs-docgen": "^3.0.10",
-    "typescript": "^5.0.0"
+    "typescript": "^6.0.3"
   },
   "peerDependencies": {},
   "peerDependenciesMeta": {}
