@@ -1,6 +1,6 @@
-import { rmSync, mkdirSync, cpSync, existsSync } from 'node:fs';
-import { green, dim, yellow, bold } from 'colorette';
-import type { ManicProvider, BuildContext } from '../types';
+import { rmSync, mkdirSync, cpSync, existsSync } from "node:fs";
+import { green, dim, yellow, bold } from "@manicjs/tui";
+import type { ManicProvider, BuildContext } from "../types";
 
 export interface NetlifyOptions {
   /**
@@ -11,21 +11,18 @@ export interface NetlifyOptions {
 }
 
 /** Create the Netlify deployment provider. @see https://www.manicjs.tech/docs/framework/deployment#official-providers */
-export function netlify(options: NetlifyOptions = {}): ManicProvider {
-  // Default to serverless functions for better compatibility
-  const useEdge = options.edge ?? false;
-
+export function netlify(_options: NetlifyOptions = {}): ManicProvider {
   return {
-    name: 'netlify',
+    name: "netlify",
     async build(ctx: BuildContext) {
-      process.stdout.write(dim('● Exporting to Netlify...'));
+      process.stdout.write(dim("● Exporting to Netlify..."));
 
-      rmSync('dist', { recursive: true, force: true });
-      rmSync('netlify', { recursive: true, force: true });
+      rmSync("dist", { recursive: true, force: true });
+      rmSync("netlify", { recursive: true, force: true });
 
-      cpSync(`${ctx.dist}/client`, 'dist', { recursive: true });
+      cpSync(`${ctx.dist}/client`, "dist", { recursive: true });
 
-      const faviconFiles = ['favicon.ico', 'favicon.svg', 'favicon.png'];
+      const faviconFiles = ["favicon.ico", "favicon.svg", "favicon.png"];
       for (const favicon of faviconFiles) {
         if (existsSync(`dist/assets/${favicon}`)) {
           cpSync(`dist/assets/${favicon}`, `dist/${favicon}`);
@@ -33,10 +30,7 @@ export function netlify(options: NetlifyOptions = {}): ManicProvider {
         }
       }
 
-      const docsPath =
-        ctx.config.swagger !== false
-          ? (ctx.config.swagger?.path ?? '/docs')
-          : null;
+      const docsPath = ctx.config.swagger === false ? null : (ctx.config.swagger?.path ?? "/docs");
 
       const apiImports: string[] = [];
       const apiRoutes: string[] = [];
@@ -45,30 +39,28 @@ export function netlify(options: NetlifyOptions = {}): ManicProvider {
       if (existsSync(`${ctx.dist}/api`)) {
         for (const entry of ctx.apiEntries) {
           const name = entry
-            .replace('app/api/', '')
-            .replace('/index.ts', '')
-            .replace('index.ts', 'root');
+            .replace("app/api/", "")
+            .replace("/index.ts", "")
+            .replace("index.ts", "root");
 
-          apiImports.push(
-            `import api_${name.replace(/-/g, '_')} from "${cwd}/${entry}";`
-          );
-          const routePath = name === 'root' ? '' : `/${name}`;
+          apiImports.push(`import api_${name.replaceAll("-", "_")} from "${cwd}/${entry}";`);
+          const routePath = name === "root" ? "" : `/${name}`;
           apiRoutes.push(
-            `app.group("/api${routePath}", (g) => g.use(api_${name.replace(/-/g, '_')}));`
+            `app.group("/api${routePath}", (g) => g.use(api_${name.replaceAll("-", "_")}));`,
           );
         }
       }
 
       // Serverless Functions (Node.js runtime) - recommended
-      mkdirSync('netlify/functions', { recursive: true });
+      mkdirSync("netlify/functions", { recursive: true });
 
       const functionCode = `import { Hono } from "hono";
-${apiImports.join('\n')}
+${apiImports.join("\n")}
 
 const app = new Hono();
 const apiApp = new Hono();
 
-${apiRoutes.join('\n')}
+${apiRoutes.join("\n")}
 
 app.route("/api", apiApp);
 
@@ -80,14 +72,14 @@ for (const { path, method } of apiApp.routes) {
   if (!paths[oaPath]) paths[oaPath] = {};
   paths[oaPath][method.toLowerCase()] = { responses: { 200: { description: "OK" } } };
 }
-const spec = { openapi: "3.0.0", info: { title: "${ctx.config.app?.name ?? 'Manic'} API", version: "1.0.0" }, paths };
+const spec = { openapi: "3.0.0", info: { title: "${ctx.config.app?.name ?? "Manic"} API", version: "1.0.0" }, paths };
 app.get("/openapi.json", (c) => c.json(spec));
 
 ${
   docsPath
     ? `app.get("${docsPath}", (c) => c.html(\`<html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>API Reference</title></head><body><script id="api-reference" data-url="/openapi.json"></script><script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script></body></html>\`));
 app.get("${docsPath}/*", (c) => c.html(\`<html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>API Reference</title></head><body><script id="api-reference" data-url="/openapi.json"></script><script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script></body></html>\`));`
-    : ''
+    : ""
 }
 
 export const handler = async (event, context) => {
@@ -130,21 +122,21 @@ export const handler = async (event, context) => {
 };
 `;
 
-      const tempEntry = 'netlify/functions/_entry.ts';
+      const tempEntry = "netlify/functions/_entry.ts";
       await Bun.write(tempEntry, functionCode);
 
       const buildResult = await Bun.build({
         entrypoints: [tempEntry],
-        outdir: 'netlify/functions',
-        target: 'node',
-        format: 'esm',
+        outdir: "netlify/functions",
+        target: "node",
+        format: "esm",
         minify: true,
-        naming: 'api.mjs',
+        naming: "api.mjs",
       });
 
       if (!buildResult.success) {
-        console.error('\nNetlify build failed:');
-        buildResult.logs.forEach(log => console.error(log));
+        console.error("\nNetlify build failed:");
+        buildResult.logs.forEach((log) => console.error(log));
         return;
       }
 
@@ -152,14 +144,12 @@ export const handler = async (event, context) => {
 
       // Create package.json for ESM support
       await Bun.write(
-        'netlify/functions/package.json',
-        JSON.stringify({ type: 'module' }, null, 2)
+        "netlify/functions/package.json",
+        JSON.stringify({ type: "module" }, null, 2),
       );
 
-      process.stdout.write(
-        `\r${dim(green('● Exporting to Netlify... done'))}\n`
-      );
-      console.log(yellow(bold('ℹ Deploy with: manic deploy')));
+      process.stdout.write(`\r${dim(green("● Exporting to Netlify... done"))}\n`);
+      console.log(yellow(bold("ℹ Deploy with: manic deploy")));
     },
   };
 }
